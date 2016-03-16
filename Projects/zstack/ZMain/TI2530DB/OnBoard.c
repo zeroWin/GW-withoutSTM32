@@ -24,7 +24,7 @@
   its documentation for any purpose.
 
   YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
-  PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+  PROVIDED “AS IS?WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
   INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
   NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
   TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,
@@ -135,7 +135,7 @@ void InitBoard( uint8 level )
   else  // !OB_COLD
   {
     /* Initialize Key stuff */
-    HalKeyConfig(HAL_KEY_INTERRUPT_DISABLE, OnBoard_KeyCallback);
+    HalKeyConfig(HAL_KEY_INTERRUPT_ENABLE, OnBoard_KeyCallback);
   }
 }
 
@@ -243,9 +243,9 @@ void OnBoard_KeyCallback ( uint8 keys, uint8 state )
 {
   uint8 shift;
   (void)state;
-
+  
   shift = (keys & HAL_KEY_SW_6) ? true : false;
-
+  
   if ( OnBoard_SendKeys( keys, shift ) != ZSuccess )
   {
     // Process SW1 here
@@ -271,6 +271,7 @@ void OnBoard_KeyCallback ( uint8 keys, uint8 state )
     // Process SW6 here
     if ( keys & HAL_KEY_SW_6 )  // Switch 6
     {
+      HalLedSet(HAL_LED_1,HAL_LED_MODE_TOGGLE);
     }
   }
 }
