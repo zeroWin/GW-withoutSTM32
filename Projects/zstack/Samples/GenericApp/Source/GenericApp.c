@@ -177,7 +177,7 @@ void GenericApp_Init( byte task_id )
 
   GenericApp_DstAddr.addrMode = (afAddrMode_t)AddrBroadcast;
   GenericApp_DstAddr.endPoint = GENERICAPP_ENDPOINT;
-  GenericApp_DstAddr.addr.shortAddr = 0;
+  GenericApp_DstAddr.addr.shortAddr = 0xFFFF;
 
   // Fill out the endpoint description.
   GenericApp_epDesc.endPoint = GENERICAPP_ENDPOINT;
@@ -381,6 +381,9 @@ void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
 void GenericApp_HandleKeys( byte shift, byte keys )
 {
   char schar[]="hello";
+  _NIB.nwkPanId;
+
+
   if(keys & HAL_KEY_SW_6)
   {
 //    AF_DataRequest(&GenericApp_DstAddr,&GenericApp_epDesc,
@@ -390,10 +393,23 @@ void GenericApp_HandleKeys( byte shift, byte keys )
 //                   &GenericApp_TransID,
 //                   AF_DISCV_ROUTE,AF_DEFAULT_RADIUS
 //                   );
-    _NIB.nwkPanId;
-    
-    HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);
+    if ( AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
+                         GENERICAPP_CLUSTERID,
+                         (byte)osal_strlen( schar ) + 1,
+                         (byte *)&schar,
+                         &GenericApp_TransID,
+                         AF_DISCV_ROUTE, AF_DEFAULT_RADIUS ) == afStatus_SUCCESS )
+    {
+      // Successfully requested to be sent.
+      HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);
 
+    }
+    else
+    {
+      // Error occurred in request to send.
+      HalLedSet(HAL_LED_1,HAL_LED_MODE_TOGGLE);
+
+    };    
   }
 }
 
