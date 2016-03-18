@@ -157,6 +157,16 @@ void GenericApp_SendTheMessage( void );
  */
 void GenericApp_Init( byte task_id )
 {
+  ZLongAddr_t enddivceIEEE;
+  enddivceIEEE[0]=0xC2;
+  enddivceIEEE[1]=0xCC;
+  enddivceIEEE[2]=0x17;
+  enddivceIEEE[3]=0x07;
+  enddivceIEEE[4]=0x00;
+  enddivceIEEE[5]=0x4B;
+  enddivceIEEE[6]=0x12;
+  enddivceIEEE[7]=0x00;
+  
   GenericApp_TaskID = task_id;
   GenericApp_NwkState = DEV_INIT;
   GenericApp_TransID = 0;
@@ -165,8 +175,8 @@ void GenericApp_Init( byte task_id )
   // If the hardware is application specific - add it here.
   // If the hardware is other parts of the device add it in main().
 
-  GenericApp_DstAddr.addrMode = (afAddrMode_t)AddrNotPresent;
-  GenericApp_DstAddr.endPoint = 0;
+  GenericApp_DstAddr.addrMode = (afAddrMode_t)AddrBroadcast;
+  GenericApp_DstAddr.endPoint = GENERICAPP_ENDPOINT;
   GenericApp_DstAddr.addr.shortAddr = 0;
 
   // Fill out the endpoint description.
@@ -259,9 +269,9 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
               || (GenericApp_NwkState == DEV_END_DEVICE) )
           {
             // Start sending "the" message in a regular interval.
-            osal_start_timerEx( GenericApp_TaskID,
+/*            osal_start_timerEx( GenericApp_TaskID,
                                 GENERICAPP_SEND_MSG_EVT,
-                                GENERICAPP_SEND_MSG_TIMEOUT );
+                                GENERICAPP_SEND_MSG_TIMEOUT );*/
           }
           break;
 
@@ -370,9 +380,20 @@ void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
  */
 void GenericApp_HandleKeys( byte shift, byte keys )
 {
+  char schar[]="hello";
   if(keys & HAL_KEY_SW_6)
   {
-    HalLedSet(HAL_LED_1,HAL_LED_MODE_TOGGLE);
+//    AF_DataRequest(&GenericApp_DstAddr,&GenericApp_epDesc,
+//                   GENERICAPP_CLUSTERID,
+//                   (byte)osal_strlen(schar)+1,
+//                   (byte *)&schar,
+//                   &GenericApp_TransID,
+//                   AF_DISCV_ROUTE,AF_DEFAULT_RADIUS
+//                   );
+    _NIB.nwkPanId;
+    
+    HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);
+
   }
 }
 
