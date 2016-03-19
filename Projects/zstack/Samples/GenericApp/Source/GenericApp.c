@@ -157,16 +157,6 @@ void GenericApp_SendTheMessage( void );
  */
 void GenericApp_Init( byte task_id )
 {
-  ZLongAddr_t enddivceIEEE;
-  enddivceIEEE[0]=0xC2;
-  enddivceIEEE[1]=0xCC;
-  enddivceIEEE[2]=0x17;
-  enddivceIEEE[3]=0x07;
-  enddivceIEEE[4]=0x00;
-  enddivceIEEE[5]=0x4B;
-  enddivceIEEE[6]=0x12;
-  enddivceIEEE[7]=0x00;
-  
   GenericApp_TaskID = task_id;
   GenericApp_NwkState = DEV_INIT;
   GenericApp_TransID = 0;
@@ -175,10 +165,23 @@ void GenericApp_Init( byte task_id )
   // If the hardware is application specific - add it here.
   // If the hardware is other parts of the device add it in main().
 
-  GenericApp_DstAddr.addrMode = (afAddrMode_t)AddrBroadcast;
-  GenericApp_DstAddr.endPoint = GENERICAPP_ENDPOINT;
-  GenericApp_DstAddr.addr.shortAddr = 0xFFFF;
+  //广播方式发送
+//  GenericApp_DstAddr.addrMode = (afAddrMode_t)AddrBroadcast;
+//  GenericApp_DstAddr.endPoint = GENERICAPP_ENDPOINT;
+//  GenericApp_DstAddr.addr.shortAddr = 0xFFFF;
 
+  //单播IEEE方式发送
+  GenericApp_DstAddr.addrMode = (afAddrMode_t)Addr64Bit;
+  GenericApp_DstAddr.endPoint = GENERICAPP_ENDPOINT;
+  GenericApp_DstAddr.addr.extAddr[0] = 0xC2;
+  GenericApp_DstAddr.addr.extAddr[1] = 0xCC;
+  GenericApp_DstAddr.addr.extAddr[2] = 0x17;
+  GenericApp_DstAddr.addr.extAddr[3] = 0x07;
+  GenericApp_DstAddr.addr.extAddr[4] = 0x00;
+  GenericApp_DstAddr.addr.extAddr[5] = 0x4B;
+  GenericApp_DstAddr.addr.extAddr[6] = 0x12;
+  GenericApp_DstAddr.addr.extAddr[7] = 0x00;
+  
   // Fill out the endpoint description.
   GenericApp_epDesc.endPoint = GENERICAPP_ENDPOINT;
   GenericApp_epDesc.task_id = &GenericApp_TaskID;
