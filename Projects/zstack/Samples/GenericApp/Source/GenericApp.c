@@ -170,17 +170,21 @@ void GenericApp_Init( byte task_id )
 //  GenericApp_DstAddr.endPoint = GENERICAPP_ENDPOINT;
 //  GenericApp_DstAddr.addr.shortAddr = 0xFFFF;
 
-  //单播IEEE方式发送
-  GenericApp_DstAddr.addrMode = (afAddrMode_t)Addr64Bit;
+//  //单播IEEE方式发送
+//  GenericApp_DstAddr.addrMode = (afAddrMode_t)Addr64Bit;
+//  GenericApp_DstAddr.endPoint = GENERICAPP_ENDPOINT;
+//  GenericApp_DstAddr.addr.extAddr[0] = 0xC2;
+//  GenericApp_DstAddr.addr.extAddr[1] = 0xCC;
+//  GenericApp_DstAddr.addr.extAddr[2] = 0x17;
+//  GenericApp_DstAddr.addr.extAddr[3] = 0x07;
+//  GenericApp_DstAddr.addr.extAddr[4] = 0x00;
+//  GenericApp_DstAddr.addr.extAddr[5] = 0x4B;
+//  GenericApp_DstAddr.addr.extAddr[6] = 0x12;
+//  GenericApp_DstAddr.addr.extAddr[7] = 0x00;
+  
+  // 单播shortAddress方式发送，短地址在Device annce处理部分添加
+  GenericApp_DstAddr.addrMode = (afAddrMode_t)Addr16Bit;
   GenericApp_DstAddr.endPoint = GENERICAPP_ENDPOINT;
-  GenericApp_DstAddr.addr.extAddr[0] = 0xC2;
-  GenericApp_DstAddr.addr.extAddr[1] = 0xCC;
-  GenericApp_DstAddr.addr.extAddr[2] = 0x17;
-  GenericApp_DstAddr.addr.extAddr[3] = 0x07;
-  GenericApp_DstAddr.addr.extAddr[4] = 0x00;
-  GenericApp_DstAddr.addr.extAddr[5] = 0x4B;
-  GenericApp_DstAddr.addr.extAddr[6] = 0x12;
-  GenericApp_DstAddr.addr.extAddr[7] = 0x00;
   
   // Fill out the endpoint description.
   GenericApp_epDesc.endPoint = GENERICAPP_ENDPOINT;
@@ -203,6 +207,7 @@ void GenericApp_Init( byte task_id )
   ZDO_RegisterForZDOMsg( GenericApp_TaskID, End_Device_Bind_rsp );
   ZDO_RegisterForZDOMsg( GenericApp_TaskID, Match_Desc_rsp );
   ZDO_RegisterForZDOMsg( GenericApp_TaskID, Device_annce );
+//  ZDO_RegisterForZDOMsg( GenericApp_TaskID, Simple_Desc_req);
 }
 
 /*********************************************************************
@@ -329,6 +334,7 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
  */
 void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
 {
+  zAddrType_t dstAddr;
   switch ( inMsg->clusterID )
   {
     case End_Device_Bind_rsp:
@@ -372,9 +378,17 @@ void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
          //从第三个字节开始的8个字节是连接上节点的IEEE地址
          //两个都是低位在前，高位在后，比如inMsg->asdu[0]=0x11,inMsg->asdu[1]=0x22
          //则连接节点的Short Address是0x2211
+         GenericApp_DstAddr.addr.shortAddr = (((uint16)inMsg->asdu[1]) << 8) | (uint16)(inMsg->asdu[0]);
+//         dstAddr.addrMode = Addr16Bit;
+//         dstAddr.addr.shortAddr=GenericApp_DstAddr.addr.shortAddr;
+//         ZDP_SimpleDescReq(&dstAddr,0x0000,GenericApp_DstAddr.endPoint,FALSE);
        }
        break;
-    
+//     case Simple_Desc_rsp:
+//       {
+//         GenericApp_DstAddr.addr.shortAddr = (((uint16)inMsg->asdu[1]) << 8) | (uint16)(inMsg->asdu[0]);
+//       }
+//       break;
   }
 }
 
