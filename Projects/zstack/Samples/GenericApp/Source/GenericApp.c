@@ -202,6 +202,7 @@ void GenericApp_Init( byte task_id )
 
   ZDO_RegisterForZDOMsg( GenericApp_TaskID, End_Device_Bind_rsp );
   ZDO_RegisterForZDOMsg( GenericApp_TaskID, Match_Desc_rsp );
+  ZDO_RegisterForZDOMsg( GenericApp_TaskID, Device_annce );
 }
 
 /*********************************************************************
@@ -364,6 +365,16 @@ void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
         }
       }
       break;
+      
+     case Device_annce:
+       {
+         //inMsg->asdu的前两个字节是连接上节点的短地址
+         //从第三个字节开始的8个字节是连接上节点的IEEE地址
+         //两个都是低位在前，高位在后，比如inMsg->asdu[0]=0x11,inMsg->asdu[1]=0x22
+         //则连接节点的Short Address是0x2211
+       }
+       break;
+    
   }
 }
 
