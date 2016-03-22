@@ -401,6 +401,42 @@ void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
        break;
      case Simple_Desc_rsp:
        {
+         ZDO_SimpleDescRsp_t *pSimpleDescRsp;   // pointer to received simple desc response
+         pSimpleDescRsp = (ZDO_SimpleDescRsp_t *)osal_mem_alloc( sizeof( ZDO_SimpleDescRsp_t ) );
+         
+         if(pSimpleDescRsp)
+         {
+           pSimpleDescRsp->simpleDesc.pAppInClusterList = NULL;
+           pSimpleDescRsp->simpleDesc.pAppOutClusterList = NULL;
+
+           ZDO_ParseSimpleDescRsp( inMsg, pSimpleDescRsp );
+           
+           if( pSimpleDescRsp->simpleDesc.AppDeviceId == M_DEVICEID_ECG)// 这次连接到的设备是ECG
+           {
+             //对ECG设备信息的相关处理添加在这里
+             char schar[]="ECG";
+             AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
+                         GENERICAPP_CLUSTERID,
+                         (byte)osal_strlen( schar ) + 1,
+                         (byte *)&schar,
+                         &GenericApp_TransID,
+                         AF_DISCV_ROUTE, AF_DEFAULT_RADIUS );
+           }
+           
+           // free memory for InClusterList
+           if (pSimpleDescRsp->simpleDesc.pAppInClusterList)
+           {
+             osal_mem_free(pSimpleDescRsp->simpleDesc.pAppInClusterList);
+           }
+
+           // free memory for OutClusterList
+           if (pSimpleDescRsp->simpleDesc.pAppOutClusterList)
+           {
+             osal_mem_free(pSimpleDescRsp->simpleDesc.pAppOutClusterList);
+           }
+           
+           osal_mem_free( pSimpleDescRsp );
+         }
        }
        break;
   }
@@ -423,9 +459,7 @@ void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
 void GenericApp_HandleKeys( byte shift, byte keys )
 {
   char schar[]="hello";
-  _NIB.nwkPanId;
-
-
+  
   if(keys & HAL_KEY_SW_6)
   {
     if ( AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,

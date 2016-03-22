@@ -59,7 +59,7 @@ extern "C"
 #define GENERICAPP_ENDPOINT           10
 
 #define GENERICAPP_PROFID             0x0F04
-#define GENERICAPP_DEVICEID           0x0001
+#define GENERICAPP_DEVICEID           0x00FF //GW device ID
 #define GENERICAPP_DEVICE_VERSION     0
 #define GENERICAPP_FLAGS              0
 
@@ -72,7 +72,10 @@ extern "C"
 // Application Events (OSAL) - These are bit weighted definitions.
 // 除了Ox8000-SYS_EVENT_MSG均可用，一共可以注册15个用户事件
 #define GENERICAPP_SEND_MSG_EVT       0x0001
-#define SIMPLE_DESC_QUERY_EVT       0x0002
+#define SIMPLE_DESC_QUERY_EVT         0x0002
+  
+// Measure Device IDs
+#define M_DEVICEID_ECG                0x0001  //ECG device ID
   
 /*********************************************************************
  * MACROS
