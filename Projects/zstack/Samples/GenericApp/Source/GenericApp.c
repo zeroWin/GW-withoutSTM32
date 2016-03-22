@@ -124,6 +124,7 @@ devStates_t GenericApp_NwkState;
 byte GenericApp_TransID;  // This is the unique message ID (counter)
 
 afAddrType_t GenericApp_DstAddr;
+static zAddrType_t simpleDescReqAddr;                // destination addresses for simple desc request
 
 /*********************************************************************
  * LOCAL FUNCTIONS
@@ -207,7 +208,7 @@ void GenericApp_Init( byte task_id )
   ZDO_RegisterForZDOMsg( GenericApp_TaskID, End_Device_Bind_rsp );
   ZDO_RegisterForZDOMsg( GenericApp_TaskID, Match_Desc_rsp );
   ZDO_RegisterForZDOMsg( GenericApp_TaskID, Device_annce );
-//  ZDO_RegisterForZDOMsg( GenericApp_TaskID, Simple_Desc_req);
+  ZDO_RegisterForZDOMsg( GenericApp_TaskID, Simple_Desc_rsp);
 }
 
 /*********************************************************************
@@ -314,7 +315,15 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
     // return unprocessed events
     return (events ^ GENERICAPP_SEND_MSG_EVT);
   }
+  
+  // event to get simple descriptor of the newly joined device
+  if ( events & SIMPLE_DESC_QUERY_EVT)
+  {
+    ZDP_SimpleDescReq( &simpleDescReqAddr, simpleDescReqAddr.addr.shortAddr,
+                      GENERICAPP_ENDPOINT, 0);
 
+    return ( events ^ SIMPLE_DESC_QUERY_EVT );    
+  }
   // Discard unknown events
   return 0;
 }
@@ -334,7 +343,7 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
  */
 void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
 {
-  zAddrType_t dstAddr;
+  ZDO_DeviceAnnce_t devAnnce;
   switch ( inMsg->clusterID )
   {
     case End_Device_Bind_rsp:
@@ -378,17 +387,22 @@ void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
          //从第三个字节开始的8个字节是连接上节点的IEEE地址
          //两个都是低位在前，高位在后，比如inMsg->asdu[0]=0x11,inMsg->asdu[1]=0x22
          //则连接节点的Short Address是0x2211
-         GenericApp_DstAddr.addr.shortAddr = (((uint16)inMsg->asdu[1]) << 8) | (uint16)(inMsg->asdu[0]);
-//         dstAddr.addrMode = Addr16Bit;
-//         dstAddr.addr.shortAddr=GenericApp_DstAddr.addr.shortAddr;
-//         ZDP_SimpleDescReq(&dstAddr,0x0000,GenericApp_DstAddr.endPoint,FALSE);
+         //GenericApp_DstAddr.addr.shortAddr = (((uint16)inMsg->asdu[1]) << 8) | (uint16)(inMsg->asdu[0]);
+         //可以直接调用现成的消息处理函数获取
+         ZDO_ParseDeviceAnnce( inMsg, &devAnnce );
+         GenericApp_DstAddr.addr.shortAddr = devAnnce.nwkAddr;
+         
+         simpleDescReqAddr.addrMode = (afAddrMode_t)Addr16Bit;
+         simpleDescReqAddr.addr.shortAddr=devAnnce.nwkAddr;
+         
+         // set simple descriptor query event
+         osal_set_event(GenericApp_TaskID,SIMPLE_DESC_QUERY_EVT);
        }
        break;
-//     case Simple_Desc_rsp:
-//       {
-//         GenericApp_DstAddr.addr.shortAddr = (((uint16)inMsg->asdu[1]) << 8) | (uint16)(inMsg->asdu[0]);
-//       }
-//       break;
+     case Simple_Desc_rsp:
+       {
+       }
+       break;
   }
 }
 
@@ -414,13 +428,6 @@ void GenericApp_HandleKeys( byte shift, byte keys )
 
   if(keys & HAL_KEY_SW_6)
   {
-//    AF_DataRequest(&GenericApp_DstAddr,&GenericApp_epDesc,
-//                   GENERICAPP_CLUSTERID,
-//                   (byte)osal_strlen(schar)+1,
-//                   (byte *)&schar,
-//                   &GenericApp_TransID,
-//                   AF_DISCV_ROUTE,AF_DEFAULT_RADIUS
-//                   );
     if ( AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
                          GENERICAPP_CLUSTERID,
                          (byte)osal_strlen( schar ) + 1,
@@ -437,7 +444,7 @@ void GenericApp_HandleKeys( byte shift, byte keys )
       // Error occurred in request to send.
       HalLedSet(HAL_LED_1,HAL_LED_MODE_TOGGLE);
 
-    };    
+    }
   }
 }
 
