@@ -343,7 +343,6 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
  */
 void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
 {
-  ZDO_DeviceAnnce_t devAnnce;
   switch ( inMsg->clusterID )
   {
     case End_Device_Bind_rsp:
@@ -389,6 +388,7 @@ void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
          //则连接节点的Short Address是0x2211
          //GenericApp_DstAddr.addr.shortAddr = (((uint16)inMsg->asdu[1]) << 8) | (uint16)(inMsg->asdu[0]);
          //可以直接调用现成的消息处理函数获取
+         ZDO_DeviceAnnce_t devAnnce;
          ZDO_ParseDeviceAnnce( inMsg, &devAnnce );
          GenericApp_DstAddr.addr.shortAddr = devAnnce.nwkAddr;
          
