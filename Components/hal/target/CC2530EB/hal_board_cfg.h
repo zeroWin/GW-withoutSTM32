@@ -405,6 +405,9 @@ st( \
 #endif
 #endif
 
+//对UART的使用方式的定义，添加在设置中
+//HAL_UART_DMA = 0 禁用UART的DMA模式
+//HAL_UART_ISR = 1 使用UART1的ISR模式
 #if HAL_UART
   #ifndef HAL_UART_DMA
     #if HAL_DMA
