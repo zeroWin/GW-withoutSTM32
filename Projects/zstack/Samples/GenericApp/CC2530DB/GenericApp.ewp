@@ -3191,6 +3191,12 @@
     <file>
       <name>$PROJ_DIR$\..\Source\OSAL_GenericApp.c</name>
     </file>
+    <file>
+      <name>$PROJ_DIR$\..\Source\Serial.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\Source\Serial.h</name>
+    </file>
   </group>
   <group>
     <name>HAL</name>
