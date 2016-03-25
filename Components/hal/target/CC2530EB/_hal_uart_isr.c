@@ -114,7 +114,7 @@
 #undef HAL_UART_Px_RTS
 #undef HAL_UART_Px_CTS
 #undef HAL_UART_Px_RX_TX
-#if (HAL_UART_ISR == 1)
+#if (HAL_UART_ISR == 2)
 #define PxOUT                      P0
 #define PxDIR                      P0DIR
 #define PxSEL                      P0SEL
@@ -128,9 +128,9 @@
 #define UTXxIE                     UTX0IE
 #define UTXxIF                     UTX0IF
 #else
-#define PxOUT                      P1
-#define PxDIR                      P1DIR
-#define PxSEL                      P1SEL
+#define PxOUT                      P0
+#define PxDIR                      P0DIR
+#define PxSEL                      P0SEL
 #define UxCSR                      U1CSR
 #define UxUCR                      U1UCR
 #define UxDBUF                     U1DBUF
@@ -148,10 +148,10 @@
 #define HAL_UART_Px_RTS            0x20         // Peripheral I/O Select for RTS.
 #define HAL_UART_Px_CTS            0x10         // Peripheral I/O Select for CTS.
 #else
-#define HAL_UART_PERCFG_BIT        0x02         // USART1 on P1, Alt-2; so set this bit.
-#define HAL_UART_Px_RTS            0x20         // Peripheral I/O Select for RTS.
-#define HAL_UART_Px_CTS            0x10         // Peripheral I/O Select for CTS.
-#define HAL_UART_Px_RX_TX          0xC0         // Peripheral I/O Select for Rx/Tx.
+#define HAL_UART_PERCFG_BIT        0x02         // USART1 on P0, Alt-1; so clear this bit.
+#define HAL_UART_Px_RTS            0x08         // Peripheral I/O Select for RTS.
+#define HAL_UART_Px_CTS            0x04         // Peripheral I/O Select for CTS.
+#define HAL_UART_Px_RX_TX          0x30         // Peripheral I/O Select for Rx/Tx.
 #endif
 
 // The timeout tick is at 32-kHz, so multiply msecs by 33.
