@@ -42,6 +42,7 @@
  ***************************************************************************************************/
 #include "Serial.h"
 #include "hal_uart.h"
+#include "OSAL.h"
 
 /***************************************************************************************************
  *                                             CONSTANTS
@@ -85,12 +86,14 @@
 /**************************************************************************************************
  *                                        INNER GLOBAL VARIABLES
  **************************************************************************************************/
+/* Used to indentify the application ID for osal task */
+uint8 registeredSerialTaskID;
 
 
 /**************************************************************************************************
  *                                        FUNCTIONS - Local
  **************************************************************************************************/
-
+void Serial_UartProcesssData( uint8 port, uint8 event);
 
 /**************************************************************************************************
  *                                        FUNCTIONS - API
@@ -112,6 +115,10 @@ void Serial_Init( void )
   //主要就是设置BAUD、硬件流控制、回调函数。
   halUARTCfg_t uartConfig;
   
+  /* Initialize APP ID */
+  registeredSerialTaskID = 0;
+  
+  /* UART Configuration */  
   uartConfig.configured           = TRUE;              // 2x30 don't care - see uart driver.
   uartConfig.baudRate             = SERIAL_BAUD;
   uartConfig.flowControl          = FALSE;             //关闭硬件流控制
@@ -120,9 +127,86 @@ void Serial_Init( void )
   uartConfig.tx.maxBufSize        = SERIAL_TX_SZ;      // 2x30 don't care - see uart driver.
   uartConfig.idleTimeout          = SERIAL_IDLE;       // 2x30 don't care - see uart driver.
   uartConfig.intEnable            = TRUE;              // 2x30 don't care - see uart driver.
-  uartConfig.callBackFunc         = NULL;
+  uartConfig.callBackFunc         = Serial_UartProcesssData;
   
   
   HalUARTOpen( SERIAL_PORT , &uartConfig );
 }
 
+/***************************************************************************************************
+ * @fn      Serial_UartProcesssData 
+ *
+ * @brief   Parses the data and determine either is UART
+ *          Reference to MT_UartProcessZAppData on MT_UART.c
+ *
+ * @param   port     - UART port
+ *          event    - Event that causes the callback
+ *
+ *
+ * @return  None
+ ***************************************************************************************************/
+void Serial_UartProcesssData( uint8 port, uint8 event)
+{
+  osal_event_hdr_t *msg_ptr;
+  uint8 rxBufLen = Hal_UART_RxBufLen(port);
+  
+  /* Verify events */
+  if (event == HAL_UART_TX_FULL)
+  {
+    // Do something when TX if full
+    return;
+  }
+  
+  //接收处理
+  if (event & ( HAL_UART_RX_FULL | HAL_UART_RX_ABOUT_FULL | HAL_UART_RX_TIMEOUT))
+  {
+    if ( registeredSerialTaskID )
+    {
+      if( rxBufLen != 0 )
+      {
+        /* 2 more bytes are added, 1 for CMD type, other for length */
+        msg_ptr = (osal_event_hdr_t *)osal_msg_allocate( rxBufLen + sizeof(osal_event_hdr_t) );
+        if( msg_ptr )
+        {
+          msg_ptr->event = CMD_SERIAL_UART_MSG;
+          msg_ptr->status = rxBufLen;
+          
+          /* Read the data of Rx buffer */
+          HalUARTRead( port, (uint8 *)(msg_ptr + 1), rxBufLen );
+
+          /* Send the raw data to application...or where ever */
+          osal_msg_send( registeredSerialTaskID, (uint8 *)msg_ptr );          
+        }
+      }
+    }
+  }
+}
+
+/***************************************************************************************************
+ * @fn      Serial_UartRegisterTaskID
+ *
+ * @brief   This function registers the taskID of the application so it knows
+ *          where to send the messages whent they come in.
+ *
+ * @param   void
+ *
+ * @return  void
+ ***************************************************************************************************/
+void Serial_UartRegisterTaskID( uint8 taskID )
+{
+  registeredSerialTaskID = taskID;
+}
+
+/***************************************************************************************************
+ * @fn      Serial_UartSendMsg
+ *
+ * @brief   This function send Msg use uart to BLE
+ *
+ * @param   void
+ *
+ * @return  void
+ ***************************************************************************************************/
+void Serial_UartSendMsg( uint8 *msg , uint8 dataLen )
+{
+  HalUARTWrite( SERIAL_PORT , msg , dataLen);
+}

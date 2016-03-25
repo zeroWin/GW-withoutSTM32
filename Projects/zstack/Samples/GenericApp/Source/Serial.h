@@ -40,6 +40,9 @@
 #ifndef SERIAL_H
 #define SERIAL_H
 
+#include "Onboard.h"
+#include "OSAL.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -57,8 +60,15 @@ extern "C"
 /**************************************************************************************************
  *                                            CONSTANTS
  **************************************************************************************************/
+/* Message Command IDs */
+#define CMD_SERIAL_UART_MSG             0x01    
 
   
+typedef struct
+{
+  osal_event_hdr_t  hdr;
+  uint8             *msg;
+} OSALSerialData_t;
 /**************************************************************************************************
  *                                             FUNCTIONS - API
  **************************************************************************************************/
@@ -67,8 +77,16 @@ extern "C"
  */
 extern void Serial_Init( void );
 
+/*
+ * Register TaskID for the application
+ */
+extern void Serial_UartRegisterTaskID( uint8 taskID );
 
- 
+/*
+ * Send Msg
+ */
+extern void Serial_UartSendMsg( uint8 *msg , uint8 dataLen );
+
 #ifdef __cplusplus
 }
 #endif  

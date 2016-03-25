@@ -63,6 +63,8 @@
 #include "hal_key.h"
 #include "hal_uart.h"
 
+/* USER */
+#include "Serial.h"
 /*********************************************************************
  * MACROS
  */
@@ -134,6 +136,8 @@ void GenericApp_HandleKeys( byte shift, byte keys );
 void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pckt );
 void GenericApp_SendTheMessage( void );
 
+void GenericApp_ProcessUartData( OSALSerialData_t *inMsg );
+
 /*********************************************************************
  * NETWORK LAYER CALLBACKS
  */
@@ -199,6 +203,13 @@ void GenericApp_Init( byte task_id )
 
   // Register for all key events - This app will handle all key events
   RegisterForKeys( GenericApp_TaskID );
+
+  // Init the UART
+  Serial_Init();
+  
+  // Register for serial events - This app will handle all serial events
+  Serial_UartRegisterTaskID( GenericApp_TaskID );
+  
 
   // Update the display
 #if defined ( LCD_SUPPORTED )
@@ -284,7 +295,13 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
                                 GENERICAPP_SEND_MSG_TIMEOUT );*/
           }
           break;
-
+         
+         case CMD_SERIAL_UART_MSG:
+           GenericApp_ProcessUartData((OSALSerialData_t *)MSGpkt);
+           
+          break;
+          
+          
         default:
           break;
       }
@@ -540,5 +557,25 @@ void GenericApp_SendTheMessage( void )
   }
 }
 
+/*********************************************************************
+ * @fn      GenericApp_ProcessUartData()
+ *
+ * @brief   Process UART receive messages
+ *
+ * @param   none
+ *
+ * @return  none
+ */
+void GenericApp_ProcessUartData( OSALSerialData_t *inMsg )
+{
+  uint8 *pMsg;
+  uint8 dataLen;
+  
+  pMsg = inMsg->msg;
+  dataLen = inMsg->hdr.status;
+    
+  //把消息发回去
+  Serial_UartSendMsg( pMsg , dataLen );
+}
 /*********************************************************************
 *********************************************************************/

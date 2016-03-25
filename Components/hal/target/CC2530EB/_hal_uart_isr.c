@@ -250,11 +250,11 @@ static void HalUARTInitISR(void)
   P2DIR |= HAL_UART_PRIPO;
 
 #if (HAL_UART_ISR == 1)
-  PERCFG &= ~HAL_UART_PERCFG_BIT;    // Set UART0 I/O location to P0.
+  PERCFG &= ~HAL_UART_PERCFG_BIT;    // Set UART1 I/O location to P0.
 #else
-  PERCFG |= HAL_UART_PERCFG_BIT;     // Set UART1 I/O location to P1.
+  PERCFG |= HAL_UART_PERCFG_BIT;     // Set UART0 I/O location to P1.
 #endif
-  PxSEL  |= HAL_UART_Px_RX_TX;       // Enable Tx and Rx on P1.
+  PxSEL  |= HAL_UART_Px_RX_TX;       // Enable Tx and Rx on P0.
   ADCCFG &= ~HAL_UART_Px_RX_TX;      // Make sure ADC doesnt use this.
   UxCSR = CSR_MODE;                  // Mode is UART Mode.
   UxUCR = UCR_FLUSH;                 // Flush it.
@@ -522,7 +522,7 @@ static void HalUARTResumeISR( void )
 static void halUartRxIsr(void);
 static void halUartRxIsr(void)
 #else
-#if (HAL_UART_ISR == 1)
+#if (HAL_UART_ISR == 2)
 HAL_ISR_FUNCTION( halUart0RxIsr, URX0_VECTOR )
 #else
 HAL_ISR_FUNCTION( halUart1RxIsr, URX1_VECTOR )
@@ -559,7 +559,7 @@ HAL_ISR_FUNCTION( halUart1RxIsr, URX1_VECTOR )
 static void halUartTxIsr(void);
 static void halUartTxIsr(void)
 #else
-#if (HAL_UART_ISR == 1)
+#if (HAL_UART_ISR == 2)
 HAL_ISR_FUNCTION( halUart0TxIsr, UTX0_VECTOR )
 #else
 HAL_ISR_FUNCTION( halUart1TxIsr, UTX1_VECTOR )
