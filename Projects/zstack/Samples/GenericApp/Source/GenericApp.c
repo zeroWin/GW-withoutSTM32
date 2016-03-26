@@ -527,6 +527,9 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
 #elif defined( WIN32 )
       WPRINTSTR( pkt->cmd.Data );
 #endif
+      Serial_UartSendMsg( pkt->cmd.Data , pkt->cmd.DataLength );
+      if( pkt->cmd.DataLength == 1)
+        HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);
       break;
   }
 }
@@ -578,6 +581,28 @@ void GenericApp_ProcessUartData( OSALSerialData_t *inMsg )
     
   //把消息发回去
   Serial_UartSendMsg( pMsg , dataLen );
+  if( pMsg[4] == 0x20 )
+    return;
+  else if( pMsg[4] == 0x13 ) // 对节点发送开始测量命令
+  {
+    char schar[]="Start";
+    AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
+                    GENERICAPP_CLUSTERID,
+                    (byte)osal_strlen( schar ) + 1,
+                    (byte *)&schar,
+                    &GenericApp_TransID,
+                    AF_DISCV_ROUTE, AF_DEFAULT_RADIUS );
+  }
+  else if( pMsg[4] == 0x18 ) // 对节点发送结束测量命令
+  {
+    char schar[]="End";
+    AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
+                    GENERICAPP_CLUSTERID,
+                    (byte)osal_strlen( schar ) + 1,
+                    (byte *)&schar,
+                    &GenericApp_TransID,
+                    AF_DISCV_ROUTE, AF_DEFAULT_RADIUS );    
+  }
 }
 /*********************************************************************
 *********************************************************************/
