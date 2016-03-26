@@ -147,7 +147,7 @@ void Serial_Init( void )
  ***************************************************************************************************/
 void Serial_UartProcesssData( uint8 port, uint8 event)
 {
-  osal_event_hdr_t *msg_ptr;
+  OSALSerialData_t *msg_ptr;
   uint8 rxBufLen = Hal_UART_RxBufLen(port);
   
   /* Verify events */
@@ -165,14 +165,15 @@ void Serial_UartProcesssData( uint8 port, uint8 event)
       if( rxBufLen != 0 )
       {
         /* 2 more bytes are added, 1 for CMD type, other for length */
-        msg_ptr = (osal_event_hdr_t *)osal_msg_allocate( rxBufLen + sizeof(osal_event_hdr_t) );
+        msg_ptr = (OSALSerialData_t *)osal_msg_allocate( rxBufLen + sizeof( OSALSerialData_t ) );
         if( msg_ptr )
         {
-          msg_ptr->event = CMD_SERIAL_UART_MSG;
-          msg_ptr->status = rxBufLen;
+          msg_ptr->hdr.event = CMD_SERIAL_UART_MSG;
+          msg_ptr->hdr.status = rxBufLen;
+          msg_ptr->msg = (uint8 *)(msg_ptr + 1);
           
           /* Read the data of Rx buffer */
-          HalUARTRead( port, (uint8 *)(msg_ptr + 1), rxBufLen );
+          HalUARTRead( port, msg_ptr->msg , rxBufLen );
 
           /* Send the raw data to application...or where ever */
           osal_msg_send( registeredSerialTaskID, (uint8 *)msg_ptr );          
