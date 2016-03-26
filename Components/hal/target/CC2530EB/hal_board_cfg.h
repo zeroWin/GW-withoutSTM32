@@ -436,7 +436,7 @@ st( \
 #endif
 
 // Used to set P2 priority - USART0 over USART1 if both are defined.
-#if ((HAL_UART_DMA == 1) || (HAL_UART_ISR == 1))
+#if ((HAL_UART_DMA == 2) || (HAL_UART_ISR == 2))//Ñ¡ÔñUART1£¬HAL_UART_PRIPOÒªÎª0x40
 #define HAL_UART_PRIPO             0x00
 #else
 #define HAL_UART_PRIPO             0x40
