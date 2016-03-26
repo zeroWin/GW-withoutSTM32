@@ -477,6 +477,8 @@ void GenericApp_HandleKeys( byte shift, byte keys )
 {
   char schar[]="hello";
   
+//  uint8 uart_char[5]={0x01,0x02,0x03,0x04,0x05};
+//  HalUARTWrite( 0 , uart_char , 5); //说明发没有问题，那就是说配置没出错，可是接收有问题？
   if(keys & HAL_KEY_SW_6)
   {
     if ( AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
