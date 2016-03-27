@@ -85,7 +85,7 @@ extern void Serial_UartRegisterTaskID( uint8 taskID );
 /*
  * Send Msg
  */
-extern void Serial_UartSendMsg( uint8 *msg , uint8 dataLen );
+extern uint16 Serial_UartSendMsg( uint8 *msg , uint8 dataLen );
 
 #ifdef __cplusplus
 }

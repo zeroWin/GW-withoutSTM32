@@ -203,11 +203,12 @@ void Serial_UartRegisterTaskID( uint8 taskID )
  *
  * @brief   This function send Msg use uart to BLE
  *
- * @param   void
+ * @param   buf  - pointer to the buffer that will be written, not freed
+ *          len  - length of
  *
- * @return  void
+ * @return  length of the buffer that was sent
  ***************************************************************************************************/
-void Serial_UartSendMsg( uint8 *msg , uint8 dataLen )
+uint16 Serial_UartSendMsg( uint8 *msg , uint8 dataLen )
 {
-  HalUARTWrite( SERIAL_PORT , msg , dataLen);
+  return HalUARTWrite( SERIAL_PORT , msg , dataLen);
 }
