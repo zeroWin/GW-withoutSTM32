@@ -448,6 +448,18 @@ void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
                          AF_DISCV_ROUTE, AF_DEFAULT_RADIUS );
            }
            
+           if( pSimpleDescRsp->simpleDesc.AppDeviceId == M_DEVICEID_TEMPR)// 这次连接到的设备是Tempr
+           {
+             //对Tempr设备信息的相关处理添加在这里
+             char schar[]="Tempr";
+             AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
+                         GENERICAPP_CLUSTERID,
+                         (byte)osal_strlen( schar ) + 1,
+                         (byte *)&schar,
+                         &GenericApp_TransID,
+                         AF_DISCV_ROUTE, AF_DEFAULT_RADIUS );
+           }
+           
            // free memory for InClusterList
            if (pSimpleDescRsp->simpleDesc.pAppInClusterList)
            {

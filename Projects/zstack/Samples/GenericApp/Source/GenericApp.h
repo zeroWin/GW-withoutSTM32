@@ -76,7 +76,7 @@ extern "C"
   
 // Measure Device IDs
 #define M_DEVICEID_ECG                0x0001  //ECG device ID
-  
+#define M_DEVICEID_TEMPR              0x0002  //TEMPR device ID
 /*********************************************************************
  * MACROS
  */
