@@ -80,7 +80,7 @@ typedef struct
   /*
    * Init the list head points
    */
-  extern void endevice_info_listInit( void );
+  extern void endDevice_info_listInit( void );
 
   /*
    * Add the connect device info on the List when the device connect to the GW

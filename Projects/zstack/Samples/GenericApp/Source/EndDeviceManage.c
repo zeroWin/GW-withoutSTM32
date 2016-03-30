@@ -82,7 +82,7 @@ endDevice_info_t *endDeviceHead;
  *
  * @return  none
  */
-void endevice_info_listInit( void )
+void endDevice_info_listInit( void )
 {
   endDeviceHead = NULL;
 }
