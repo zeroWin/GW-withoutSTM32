@@ -107,7 +107,7 @@ uint8 endDevice_info_add( uint16 device_id , uint16 shortAddress)
   
   if(newDevice)
   {
- 
+    newDevice->next = (void *)NULL;
     newDevice->device_id = device_id;
     newDevice->shortAddress = shortAddress;
     
