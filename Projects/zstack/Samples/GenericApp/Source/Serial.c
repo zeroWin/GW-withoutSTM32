@@ -34,7 +34,7 @@
   (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
 
   Should you have any questions regarding your right to use this Software,
-  contact kylinnevercry@gami.com. 
+  contact kylinnevercry@gmail.com. 
 **************************************************************************************************/
 
 /***************************************************************************************************

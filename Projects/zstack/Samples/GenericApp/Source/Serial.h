@@ -34,14 +34,11 @@
   (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
 
   Should you have any questions regarding your right to use this Software,
-  contact kylinnevercry@gami.com. 
+  contact kylinnevercry@gmail.com. 
 **************************************************************************************************/
 
 #ifndef SERIAL_H
 #define SERIAL_H
-
-#include "Onboard.h"
-#include "OSAL.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -51,7 +48,9 @@ extern "C"
 /**************************************************************************************************
  *                                             INCLUDES
  **************************************************************************************************/
-  
+#include "Onboard.h"
+#include "OSAL.h"
+
 
 /**************************************************************************************************
  *                                              MACROS
