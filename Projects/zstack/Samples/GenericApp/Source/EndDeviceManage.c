@@ -210,7 +210,7 @@ uint16 endDevice_info_find( uint16 device_id )
     if( srchDevice->device_id == device_id )
       break;
     
-    // Not this on ,check another
+    // Not this one ,check another
     srchDevice = srchDevice->next;
   }
   if( srchDevice ) //find it
