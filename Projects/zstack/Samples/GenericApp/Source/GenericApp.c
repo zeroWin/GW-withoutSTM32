@@ -65,6 +65,7 @@
 
 /* USER */
 #include "Serial.h"
+#include "EndDeviceManage.h"
 /*********************************************************************
  * MACROS
  */
@@ -218,7 +219,9 @@ void GenericApp_Init( byte task_id )
   // Register for serial events - This app will handle all serial events
   Serial_UartRegisterTaskID( GenericApp_TaskID );
   
-
+  // Init Enddevice info list
+  endDevice_info_listInit();
+  
   // Update the display
 #if defined ( LCD_SUPPORTED )
     HalLcdWriteString( "GenericApp", HAL_LCD_LINE_1 );
@@ -329,9 +332,43 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
   //  (setup in GenericApp_Init()).
   if ( events & GENERICAPP_SEND_MSG_EVT )
   {
-    // Send "the" message
-    GenericApp_SendTheMessage();
+//    // Send "the" message
+//    GenericApp_SendTheMessage();
+  
+  static uint8 for_debug = 'a';
+  static uint8 device_flag = 1;  
 
+    if( device_flag == 1 )
+    {
+      device_flag = 2;
+      GenericApp_DstAddr.addr.shortAddr = endDevice_info_find(M_DEVICEID_ECG);
+    }
+    else if( device_flag == 2)
+    {
+      device_flag = 1;
+      GenericApp_DstAddr.addr.shortAddr = endDevice_info_find(M_DEVICEID_TEMPR);
+    }
+
+    if ( AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
+                         GENERICAPP_CLUSTERID,
+                         1,
+                         (byte *)&for_debug,
+                         &GenericApp_TransID,
+                         AF_DISCV_ROUTE, AF_DEFAULT_RADIUS ) == afStatus_SUCCESS )
+    {
+      // Successfully requested to be sent.
+      HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);
+      for_debug++;
+      
+      if(for_debug == 'z')
+        for_debug = 'a';
+    }
+    else
+    {
+      // Error occurred in request to send.
+      HalLedSet(HAL_LED_1,HAL_LED_MODE_TOGGLE);
+
+    }
     // Setup to send message again
     osal_start_timerEx( GenericApp_TaskID,
                         GENERICAPP_SEND_MSG_EVT,
@@ -415,7 +452,6 @@ void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
          //可以直接调用现成的消息处理函数获取
          ZDO_DeviceAnnce_t devAnnce;
          ZDO_ParseDeviceAnnce( inMsg, &devAnnce );
-         GenericApp_DstAddr.addr.shortAddr = devAnnce.nwkAddr;
          
          simpleDescReqAddr.addrMode = (afAddrMode_t)Addr16Bit;
          simpleDescReqAddr.addr.shortAddr=devAnnce.nwkAddr;
@@ -438,8 +474,12 @@ void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
            
            if( pSimpleDescRsp->simpleDesc.AppDeviceId == M_DEVICEID_ECG)// 这次连接到的设备是ECG
            {
+             // 将ECG的device_id和shortAddress存储在链表中
+             endDevice_info_add( M_DEVICEID_ECG , pSimpleDescRsp->nwkAddr );
+             
              //对ECG设备信息的相关处理添加在这里
              char schar[]="ECG";
+             GenericApp_DstAddr.addr.shortAddr = pSimpleDescRsp->nwkAddr;
              AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
                          GENERICAPP_CLUSTERID,
                          (byte)osal_strlen( schar ) + 1,
@@ -450,8 +490,13 @@ void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
            
            if( pSimpleDescRsp->simpleDesc.AppDeviceId == M_DEVICEID_TEMPR)// 这次连接到的设备是Tempr
            {
+             // 将TemprSN的device_id和shortAddress存储在链表中
+             endDevice_info_add( M_DEVICEID_TEMPR , pSimpleDescRsp->nwkAddr );
+             
+             endDevice_info_find( M_DEVICEID_TEMPR );
              //对Tempr设备信息的相关处理添加在这里
              char schar[]="Tempr";
+             GenericApp_DstAddr.addr.shortAddr = pSimpleDescRsp->nwkAddr;
              AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
                          GENERICAPP_CLUSTERID,
                          (byte)osal_strlen( schar ) + 1,
@@ -495,33 +540,18 @@ void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
  */
 void GenericApp_HandleKeys( byte shift, byte keys )
 {
-  char schar[]="hello";
-  
 //  uint8 uart_char[5]={0x01,0x02,0x03,0x04,0x05};
 //  HalUARTWrite( 0 , uart_char , 5); //说明发没有问题，那就是说配置没出错，可是接收有问题？找到原因P2DIR 6-7位没有设置好
   
-  Serial_UartSendMsg( buff1 , 100 );
-  while( Serial_UartSendMsg( buff2 , 78 ) == 0);
-  
+
   if(keys & HAL_KEY_SW_6)
   {
-    if ( AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
-                         GENERICAPP_CLUSTERID,
-                         (byte)osal_strlen( schar ) + 1,
-                         (byte *)&schar,
-                         &GenericApp_TransID,
-                         AF_DISCV_ROUTE, AF_DEFAULT_RADIUS ) == afStatus_SUCCESS )
-    {
-      // Successfully requested to be sent.
-      HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);
-
-    }
-    else
-    {
-      // Error occurred in request to send.
-      HalLedSet(HAL_LED_1,HAL_LED_MODE_TOGGLE);
-
-    }
+      Serial_UartSendMsg( buff1 , 100 );
+      while( Serial_UartSendMsg( buff2 , 78 ) == 0);
+      
+      osal_start_timerEx( GenericApp_TaskID,
+                                GENERICAPP_SEND_MSG_EVT,
+                                GENERICAPP_SEND_MSG_TIMEOUT );
   }
 }
 
