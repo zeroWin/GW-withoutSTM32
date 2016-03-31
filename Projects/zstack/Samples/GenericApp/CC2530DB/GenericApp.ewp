@@ -279,6 +279,7 @@
           <state>xMT_SYS_FUNC</state>
           <state>xMT_ZDO_FUNC</state>
           <state>xLCD_SUPPORTED=DEBUG</state>
+          <state>NV_RESTORE</state>
           <state>HAL_UART_DMA=0</state>
           <state>HAL_UART_ISR=1</state>
         </option>
