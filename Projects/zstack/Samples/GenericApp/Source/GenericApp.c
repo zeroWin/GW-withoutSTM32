@@ -572,6 +572,7 @@ void GenericApp_HandleKeys( byte shift, byte keys )
  */
 void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
 {
+  uint8 i;
   switch ( pkt->clusterId )
   {
     case GENERICAPP_CLUSTERID:
@@ -581,16 +582,9 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
 #elif defined( WIN32 )
       WPRINTSTR( pkt->cmd.Data );
 #endif
-      buff3[82]  =  pkt->cmd.Data[0];
-      buff3[84]  =  pkt->cmd.Data[0];
-      buff3[86]  =  pkt->cmd.Data[0];
-      buff3[88]  =  pkt->cmd.Data[0];
-      buff3[90]  =  pkt->cmd.Data[0];
-      buff3[92]  =  pkt->cmd.Data[0];
-      buff3[94]  =  pkt->cmd.Data[0];
-      buff3[96]  =  pkt->cmd.Data[0];
-      buff3[98]  =  pkt->cmd.Data[0];
-      buff3[100] =  pkt->cmd.Data[0];
+
+      for ( i = 0 ; i < 20 ; i++ )
+        buff3[82+i] = pkt->cmd.Data[i];
       while( Serial_UartSendMsg( buff3 , 104 ) == 0);
       if( pkt->cmd.DataLength == 1)
         HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);
