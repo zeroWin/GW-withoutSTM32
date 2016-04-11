@@ -586,8 +586,8 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
       for ( i = 0 ; i < 20 ; i++ )
         buff3[82+i] = pkt->cmd.Data[i];
       while( Serial_UartSendMsg( buff3 , 104 ) == 0);
-      if( pkt->cmd.DataLength == 1)
-        HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);
+   
+      HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);
       break;
   }
 }
@@ -646,8 +646,8 @@ void GenericApp_ProcessUartData( OSALSerialData_t *inMsg )
     // 向APP发送开始发送指令
     
 
-    Serial_UartSendMsg( buff1 , 100 );
-    while( Serial_UartSendMsg( buff2 , 78 ) == 0);
+    //Serial_UartSendMsg( buff1 , 100 );
+    //while( Serial_UartSendMsg( buff2 , 78 ) == 0);
     
     char schar[]="Start";
     AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
@@ -657,7 +657,7 @@ void GenericApp_ProcessUartData( OSALSerialData_t *inMsg )
                     &GenericApp_TransID,
                     AF_DISCV_ROUTE, AF_DEFAULT_RADIUS );
   }
-  else if( pMsg[4] == 0x18 ) // 对节点发送结束测量命令
+  else if( pMsg[4] == 0x14 ) // 对节点发送结束测量命令
   {
     char schar[]="End";
     AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
