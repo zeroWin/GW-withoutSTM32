@@ -120,7 +120,7 @@ void Serial_Init( void )
   
   /* UART Configuration */  
   uartConfig.configured           = TRUE;              // 2x30 don't care - see uart driver.
-  uartConfig.baudRate             = SERIAL_BAUD;
+  uartConfig.baudRate             = SERIAL_BAUD;       // 38400
   uartConfig.flowControl          = FALSE;             //关闭硬件流控制
   uartConfig.flowControlThreshold = SERIAL_THRESH;     // 2x30 don't care - see uart driver.
   uartConfig.rx.maxBufSize        = SERIAL_RX_SZ;      // 2x30 don't care - see uart driver.
