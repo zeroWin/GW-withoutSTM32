@@ -91,22 +91,29 @@ uint8 buff3[104] = {
  */
 
 // This list should be filled with Application specific Cluster IDs.
-const cId_t GenericApp_ClusterList[GENERICAPP_MAX_CLUSTERS] =
+const cId_t GenericApp_InClusterList[GENERICAPP_IN_CLUSTERS] =
 {
-  GENERICAPP_CLUSTERID
+  GENERICAPP_CLUSTERID,
+};
+
+const cId_t GenericApp_OutClusterList[GENERICAPP_OUT_CLUSTERS] =
+{
+  GENERICAPP_CLUSTERID,
+  GENERICAPP_CLUSTERID_START,
+  GENERICAPP_CLUSTERID_STOP
 };
 
 const SimpleDescriptionFormat_t GenericApp_SimpleDesc =
 {
-  GENERICAPP_ENDPOINT,              //  int Endpoint;
-  GENERICAPP_PROFID,                //  uint16 AppProfId[2];
-  GENERICAPP_DEVICEID,              //  uint16 AppDeviceId[2];
-  GENERICAPP_DEVICE_VERSION,        //  int   AppDevVer:4;
-  GENERICAPP_FLAGS,                 //  int   AppFlags:4;
-  GENERICAPP_MAX_CLUSTERS,          //  byte  AppNumInClusters;
-  (cId_t *)GenericApp_ClusterList,  //  byte *pAppInClusterList;
-  GENERICAPP_MAX_CLUSTERS,          //  byte  AppNumInClusters;
-  (cId_t *)GenericApp_ClusterList   //  byte *pAppInClusterList;
+  GENERICAPP_ENDPOINT,                  //  int Endpoint;
+  GENERICAPP_PROFID,                    //  uint16 AppProfId[2];
+  GENERICAPP_DEVICEID,                  //  uint16 AppDeviceId[2];
+  GENERICAPP_DEVICE_VERSION,            //  int   AppDevVer:4;
+  GENERICAPP_FLAGS,                     //  int   AppFlags:4;
+  GENERICAPP_IN_CLUSTERS,               //  byte  AppNumInClusters;
+  (cId_t *)GenericApp_InClusterList,    //  byte *pAppInClusterList;
+  GENERICAPP_OUT_CLUSTERS,              //  byte  AppNumOutClusters;
+  (cId_t *)GenericApp_OutClusterList    //  byte *pAppOutClusterList;
 };
 
 // This is the Endpoint/Interface description.  It is defined here, but
@@ -648,12 +655,10 @@ void GenericApp_ProcessUartData( OSALSerialData_t *inMsg )
 
     //Serial_UartSendMsg( buff1 , 100 );
     //while( Serial_UartSendMsg( buff2 , 78 ) == 0);
-    
-    char schar[]="Start";
     AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
-                    GENERICAPP_CLUSTERID,
-                    (byte)osal_strlen( schar ) + 1,
-                    (byte *)&schar,
+                    GENERICAPP_CLUSTERID_START,
+                    0,
+                    NULL,
                     &GenericApp_TransID,
                     AF_DISCV_ROUTE, AF_DEFAULT_RADIUS );
   }
@@ -661,9 +666,9 @@ void GenericApp_ProcessUartData( OSALSerialData_t *inMsg )
   {
     char schar[]="End";
     AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
-                    GENERICAPP_CLUSTERID,
-                    (byte)osal_strlen( schar ) + 1,
-                    (byte *)&schar,
+                    GENERICAPP_CLUSTERID_STOP,
+                    0,
+                    NULL,
                     &GenericApp_TransID,
                     AF_DISCV_ROUTE, AF_DEFAULT_RADIUS );    
   }
