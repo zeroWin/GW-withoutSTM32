@@ -94,7 +94,9 @@ uint8 buff3[104] = {
 const cId_t GenericApp_InClusterList[GENERICAPP_IN_CLUSTERS] =
 {
   GENERICAPP_CLUSTERID,
-  GENERICAPP_CLUSTERID_SYNC_OVER
+  GENERICAPP_CLUSTERID_SYNC_OVER,
+  GENERICAPP_CLUSTERID_TEMPR_RESULT,
+  GENERICAPP_CLUSTERID_ECG_RESULT
 };
 
 const cId_t GenericApp_OutClusterList[GENERICAPP_OUT_CLUSTERS] =
@@ -592,13 +594,23 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
 #elif defined( WIN32 )
       WPRINTSTR( pkt->cmd.Data );
 #endif
-
+      break;
+    case GENERICAPP_CLUSTERID_ECG_RESULT:
       for ( i = 0 ; i < 20 ; i++ )
         buff3[82+i] = pkt->cmd.Data[i];
       while( Serial_UartSendMsg( buff3 , 104 ) == 0);
    
       HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);
       break;
+    case GENERICAPP_CLUSTERID_TEMPR_RESULT:
+      uint8 buffer[12];
+      for ( i = 0 ; i < 12 ; i++ )
+        buffer[i] = pkt->cmd.Data[i];      
+      while( Serial_UartSendMsg( buff3 , 12 ) == 0);
+   
+      HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);      
+      break;
+      
     case GENERICAPP_CLUSTERID_SYNC_OVER:
       for(i = 0 ; i < 104; i++)
         while( Serial_UartSendMsg( &data , 1 ) == 0);

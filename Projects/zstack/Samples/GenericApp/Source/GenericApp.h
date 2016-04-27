@@ -63,14 +63,16 @@ extern "C"
 #define GENERICAPP_DEVICE_VERSION     0
 #define GENERICAPP_FLAGS              0
 
-#define GENERICAPP_IN_CLUSTERS        2
+#define GENERICAPP_IN_CLUSTERS        4
 #define GENERICAPP_OUT_CLUSTERS       4  
 
-#define GENERICAPP_CLUSTERID               1
-#define GENERICAPP_CLUSTERID_START         2
-#define GENERICAPP_CLUSTERID_STOP          3
-#define GENERICAPP_CLUSTERID_SYNC          4
-#define GENERICAPP_CLUSTERID_SYNC_OVER     5
+#define GENERICAPP_CLUSTERID               1   // I/O
+#define GENERICAPP_CLUSTERID_START         2   // O
+#define GENERICAPP_CLUSTERID_STOP          3   // O
+#define GENERICAPP_CLUSTERID_SYNC          4   // O
+#define GENERICAPP_CLUSTERID_SYNC_OVER     5   // I
+#define GENERICAPP_CLUSTERID_TEMPR_RESULT  6   // I
+#define GENERICAPP_CLUSTERID_ECG_RESULT    7   // I
   
 // Send Message Timeout
 #define GENERICAPP_SEND_MSG_TIMEOUT   5000     // Every 5 seconds
