@@ -94,13 +94,15 @@ uint8 buff3[104] = {
 const cId_t GenericApp_InClusterList[GENERICAPP_IN_CLUSTERS] =
 {
   GENERICAPP_CLUSTERID,
+  GENERICAPP_CLUSTERID_SYNC_OVER
 };
 
 const cId_t GenericApp_OutClusterList[GENERICAPP_OUT_CLUSTERS] =
 {
   GENERICAPP_CLUSTERID,
   GENERICAPP_CLUSTERID_START,
-  GENERICAPP_CLUSTERID_STOP
+  GENERICAPP_CLUSTERID_STOP,
+  GENERICAPP_CLUSTERID_SYNC
 };
 
 const SimpleDescriptionFormat_t GenericApp_SimpleDesc =
@@ -580,6 +582,7 @@ void GenericApp_HandleKeys( byte shift, byte keys )
 void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
 {
   uint8 i;
+  uint8 data = 0xFF;
   switch ( pkt->clusterId )
   {
     case GENERICAPP_CLUSTERID:
@@ -596,6 +599,12 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
    
       HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);
       break;
+    case GENERICAPP_CLUSTERID_SYNC_OVER:
+      for(i = 0 ; i < 104; i++)
+        while( Serial_UartSendMsg( &data , 1 ) == 0);
+      
+      break;
+  
   }
 }
 
@@ -651,8 +660,6 @@ void GenericApp_ProcessUartData( OSALSerialData_t *inMsg )
   else if( pMsg[4] == 0x13 ) // 对节点发送开始测量命令
   {
     // 向APP发送开始发送指令
-    
-
     //Serial_UartSendMsg( buff1 , 100 );
     //while( Serial_UartSendMsg( buff2 , 78 ) == 0);
     AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
@@ -664,7 +671,6 @@ void GenericApp_ProcessUartData( OSALSerialData_t *inMsg )
   }
   else if( pMsg[4] == 0x14 ) // 对节点发送结束测量命令
   {
-    char schar[]="End";
     AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
                     GENERICAPP_CLUSTERID_STOP,
                     0,
@@ -672,6 +678,17 @@ void GenericApp_ProcessUartData( OSALSerialData_t *inMsg )
                     &GenericApp_TransID,
                     AF_DISCV_ROUTE, AF_DEFAULT_RADIUS );    
   }
+  else if( pMsg[4] == 0x15 ) // 对节点发送同步命令
+  {
+    AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
+                    GENERICAPP_CLUSTERID_SYNC,
+                    0,
+                    NULL,
+                    &GenericApp_TransID,
+                    AF_DISCV_ROUTE, AF_DEFAULT_RADIUS );      
+  }
+  
+    
 }
 /*********************************************************************
 *********************************************************************/
