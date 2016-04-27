@@ -606,7 +606,7 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
       uint8 buffer[12];
       for ( i = 0 ; i < 12 ; i++ )
         buffer[i] = pkt->cmd.Data[i];      
-      while( Serial_UartSendMsg( buff3 , 12 ) == 0);
+      while( Serial_UartSendMsg( buffer , 12 ) == 0);
    
       HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);      
       break;
