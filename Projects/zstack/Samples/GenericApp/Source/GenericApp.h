@@ -63,16 +63,17 @@ extern "C"
 #define GENERICAPP_DEVICE_VERSION     0
 #define GENERICAPP_FLAGS              0
 
-#define GENERICAPP_IN_CLUSTERS        4
+#define GENERICAPP_IN_CLUSTERS        5
 #define GENERICAPP_OUT_CLUSTERS       4  
 
-#define GENERICAPP_CLUSTERID               1   // I/O
-#define GENERICAPP_CLUSTERID_START         2   // O
-#define GENERICAPP_CLUSTERID_STOP          3   // O
-#define GENERICAPP_CLUSTERID_SYNC          4   // O
-#define GENERICAPP_CLUSTERID_SYNC_OVER     5   // I
-#define GENERICAPP_CLUSTERID_TEMPR_RESULT  6   // I
-#define GENERICAPP_CLUSTERID_ECG_RESULT    7   // I
+#define GENERICAPP_CLUSTERID                  0x0001   // I/O
+#define GENERICAPP_CLUSTERID_START            0x0010   // O
+#define GENERICAPP_CLUSTERID_STOP             0x0011   // O
+#define GENERICAPP_CLUSTERID_SYNC             0x0020   // O
+#define GENERICAPP_CLUSTERID_ECG_SYNC_OVER    0x0021   // I
+#define GENETICAPP_CLUSTERID_TEMPR_SYNC_OVER  0x0022   // I
+#define GENERICAPP_CLUSTERID_TEMPR_RESULT     0x0030   // I
+#define GENERICAPP_CLUSTERID_ECG_RESULT       0x0031   // I
   
 // Send Message Timeout
 #define GENERICAPP_SEND_MSG_TIMEOUT   5000     // Every 5 seconds
@@ -85,6 +86,10 @@ extern "C"
 // Measure Device IDs
 #define M_DEVICEID_ECG                0x0001  //ECG device ID
 #define M_DEVICEID_TEMPR              0x0002  //TEMPR device ID
+  
+// SENSORTYPE ID
+#define SENSORTYPE_THERMOMETE               0xA1    // ÌåÎÂ
+#define SENSORTYPE_ELECTROCARDIOGRAMMETER   0xA2    // ÐÄµç
 /*********************************************************************
  * MACROS
  */

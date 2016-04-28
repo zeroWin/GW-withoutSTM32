@@ -82,6 +82,11 @@ uint8 buff2[78] = {
 uint8 buff3[104] = {
 0x2E,0x1F,0x62,0x0,0x17,0x0,0x0,0xA0,0x3,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xA2,0x0,0x0,0x0,0xC2,0xCC,0x17,0x7,0x0,0x4B,0x12,0x0,0xB,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x2C,0x0,0x0,0x0,0x75,0x8,0x19,0x0,0x2D,0x0,0x20,0xF2,0x97,0x48,0x0,0x40,0x0,0x0,0x6F,0x12,0x83,0x3B,0x1,0x0,0x0,0x0,0xE,0x0,0x0,0x0,0x4B,0x0,0x4C,0x0,0x4D,0x0,0x4E,0x0,0x3,0x0,0x3,0x0,0x3,0x0,0x3,0x0,0x3,0x0,0x3,0x0,0x3,0x0,0x3,0x0,0x3,0x0,0x3,0x0,0x3D,0x4B 
 };
+
+uint8 buff4[80] = {
+0x2E,0x1F,0x4A,0x00,0x17,0x00,0x00,0xA0,0x03,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xA1,0x00,0x00,0x00,0x27,0xCB,0x17,0x07,0x00,0x4B,0x12,0x00,0x0B,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x14,0x00,0x00,0x00,0xD0,0x07,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x40,0x00,0x00,0x00,0x05,0x00,0x00,0x00,0x05,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x3D,0x4B
+};
+
 /*********************************************************************
  * TYPEDEFS
  */
@@ -94,7 +99,8 @@ uint8 buff3[104] = {
 const cId_t GenericApp_InClusterList[GENERICAPP_IN_CLUSTERS] =
 {
   GENERICAPP_CLUSTERID,
-  GENERICAPP_CLUSTERID_SYNC_OVER,
+  GENERICAPP_CLUSTERID_ECG_SYNC_OVER,
+  GENETICAPP_CLUSTERID_TEMPR_SYNC_OVER,
   GENERICAPP_CLUSTERID_TEMPR_RESULT,
   GENERICAPP_CLUSTERID_ECG_RESULT
 };
@@ -157,7 +163,7 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pckt );
 void GenericApp_SendTheMessage( void );
 
 void GenericApp_ProcessUartData( OSALSerialData_t *inMsg );
-
+void GenericApp_GetDeviceNWKAddress( uint8 *dataMsg );
 /*********************************************************************
  * NETWORK LAYER CALLBACKS
  */
@@ -504,7 +510,6 @@ void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
              // 将TemprSN的device_id和shortAddress存储在链表中
              endDevice_info_add( M_DEVICEID_TEMPR , pSimpleDescRsp->nwkAddr );
              
-             endDevice_info_find( M_DEVICEID_TEMPR );
              //对Tempr设备信息的相关处理添加在这里
              char schar[]="Tempr";
              GenericApp_DstAddr.addr.shortAddr = pSimpleDescRsp->nwkAddr;
@@ -603,20 +608,22 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
       HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);
       break;
     case GENERICAPP_CLUSTERID_TEMPR_RESULT:
-      uint8 buffer[12];
-      for ( i = 0 ; i < 12 ; i++ )
-        buffer[i] = pkt->cmd.Data[i];      
-      while( Serial_UartSendMsg( buffer , 12 ) == 0);
+      for ( i = 0 ; i < 4 ; i++ )
+        buff4[74+i] = pkt->cmd.Data[i+8];      
+      while( Serial_UartSendMsg( buff4 , 80 ) == 0);
    
       HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);      
       break;
       
-    case GENERICAPP_CLUSTERID_SYNC_OVER:
+    case GENERICAPP_CLUSTERID_ECG_SYNC_OVER:
       for(i = 0 ; i < 104; i++)
-        while( Serial_UartSendMsg( &data , 1 ) == 0);
-      
+        while( Serial_UartSendMsg( &data , 1 ) == 0);      
       break;
-  
+      
+    case GENETICAPP_CLUSTERID_TEMPR_SYNC_OVER:
+      for(i = 0 ; i < 80; i++)
+        while( Serial_UartSendMsg( &data , 1 ) == 0);      
+      break;
   }
 }
 
@@ -665,6 +672,9 @@ void GenericApp_ProcessUartData( OSALSerialData_t *inMsg )
   pMsg = inMsg->msg;
   dataLen = inMsg->hdr.status;
     
+  // 得到对应设备网络地址
+  GenericApp_GetDeviceNWKAddress(pMsg);
+  
   // 把消息发回去
   // Serial_UartSendMsg( pMsg , dataLen );
   if( pMsg[4] == 0x20 )
@@ -701,6 +711,31 @@ void GenericApp_ProcessUartData( OSALSerialData_t *inMsg )
   }
   
     
+}
+
+
+/*********************************************************************
+ * @fn      GenericApp_GetDeviceNWKAddress()
+ *
+ * @brief   Get Target device NWK address
+ *
+ * @param   none
+ *
+ * @return  none
+ */
+void GenericApp_GetDeviceNWKAddress( uint8 *dataMsg )
+{
+  switch(dataMsg[20])
+  {
+    case SENSORTYPE_ELECTROCARDIOGRAMMETER: // 心电相关控制命令
+      GenericApp_DstAddr.addr.shortAddr = endDevice_info_find(M_DEVICEID_ECG);
+      break;
+    case SENSORTYPE_THERMOMETE: // 体温控制命令
+      GenericApp_DstAddr.addr.shortAddr = endDevice_info_find(M_DEVICEID_TEMPR);
+      break;
+    
+    default:break;
+  }
 }
 /*********************************************************************
 *********************************************************************/
