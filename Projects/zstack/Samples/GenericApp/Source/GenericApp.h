@@ -69,10 +69,10 @@ extern "C"
 #define GENERICAPP_CLUSTERID                  0x0001   // I/O
 #define GENERICAPP_CLUSTERID_START            0x0010   // O
 #define GENERICAPP_CLUSTERID_STOP             0x0011   // O
-#define GENERICAPP_CLUSTERID_SYNC             0x0020   // O
+#define GENERICAPP_CLUSTERID_SYNC             0x0020   // O 0x002x 是同步相关指令
 #define GENERICAPP_CLUSTERID_ECG_SYNC_OVER    0x0021   // I
 #define GENETICAPP_CLUSTERID_TEMPR_SYNC_OVER  0x0022   // I
-#define GENERICAPP_CLUSTERID_TEMPR_RESULT     0x0030   // I
+#define GENERICAPP_CLUSTERID_TEMPR_RESULT     0x0030   // I 0x003x 是测量结果相关指令
 #define GENERICAPP_CLUSTERID_ECG_RESULT       0x0031   // I
   
 // Send Message Timeout

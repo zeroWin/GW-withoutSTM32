@@ -220,6 +220,37 @@ uint16 endDevice_info_find( uint16 device_id )
 }
 
 
+/*********************************************************************
+ * @fn      endDevice_info_update
+ *
+ * @brief   update a device address on device info list
+ *          防止同一个节点多次连接，使得链表出现多个重复的节点
+ *          先调用find，如果找到，调用update，没找到调用add
+ *
+ * @param   device_id
+ *
+ * @return  none
+ */
+void endDevice_info_update( uint16 device_id ,uint16 shortAddress)
+{
+  endDevice_info_t *srchDevice;
+  
+  // Head of the device list
+  srchDevice = endDeviceHead;
+  
+  // Stop when found or at the end
+  while( srchDevice )
+  {
+    if( srchDevice->device_id == device_id )
+      break;
+    
+    // Not this one ,check another
+    srchDevice = srchDevice->next;
+  }
+  
+  if( srchDevice ) //find it
+    srchDevice->shortAddress = shortAddress;
+}
 
 
 

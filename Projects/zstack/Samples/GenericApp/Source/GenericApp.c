@@ -492,7 +492,10 @@ void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
            if( pSimpleDescRsp->simpleDesc.AppDeviceId == M_DEVICEID_ECG)// 这次连接到的设备是ECG
            {
              // 将ECG的device_id和shortAddress存储在链表中
-             endDevice_info_add( M_DEVICEID_ECG , pSimpleDescRsp->nwkAddr );
+             if(endDevice_info_find(M_DEVICEID_ECG) == FALSE)// 不存在，添加信息
+               endDevice_info_add( M_DEVICEID_ECG , pSimpleDescRsp->nwkAddr );
+             else // 存在，更新地址
+               endDevice_info_update( M_DEVICEID_ECG , pSimpleDescRsp->nwkAddr );
              
              //对ECG设备信息的相关处理添加在这里
              char schar[]="ECG";
@@ -508,7 +511,10 @@ void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
            if( pSimpleDescRsp->simpleDesc.AppDeviceId == M_DEVICEID_TEMPR)// 这次连接到的设备是Tempr
            {
              // 将TemprSN的device_id和shortAddress存储在链表中
-             endDevice_info_add( M_DEVICEID_TEMPR , pSimpleDescRsp->nwkAddr );
+             if(endDevice_info_find(M_DEVICEID_TEMPR) == FALSE)// 不存在，添加信息
+               endDevice_info_add( M_DEVICEID_TEMPR , pSimpleDescRsp->nwkAddr );
+             else // 存在，更新地址
+               endDevice_info_update( M_DEVICEID_TEMPR , pSimpleDescRsp->nwkAddr );             
              
              //对Tempr设备信息的相关处理添加在这里
              char schar[]="Tempr";

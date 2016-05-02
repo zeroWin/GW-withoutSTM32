@@ -97,6 +97,10 @@ typedef struct
    */
   extern uint16 endDevice_info_find( uint16 device_id );
 
+  /*
+   * Update shortAddress
+   */  
+  extern void endDevice_info_update( uint16 device_id ,uint16 shortAddress);
 
 #ifdef __cplusplus
 }
