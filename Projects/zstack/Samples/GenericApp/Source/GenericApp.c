@@ -100,9 +100,11 @@ const cId_t GenericApp_InClusterList[GENERICAPP_IN_CLUSTERS] =
 {
   GENERICAPP_CLUSTERID,
   GENERICAPP_CLUSTERID_ECG_SYNC_OVER,
-  GENETICAPP_CLUSTERID_TEMPR_SYNC_OVER,
+  GENERICAPP_CLUSTERID_ECG_RESULT,
+  GENERICAPP_CLUSTERID_TEMPR_SYNC_OVER,
   GENERICAPP_CLUSTERID_TEMPR_RESULT,
-  GENERICAPP_CLUSTERID_ECG_RESULT
+  GENERICAPP_CLUSTERID_SPO2_SYNC_OVER,
+  GENERICAPP_CLUSTERID_SPO2_RESULT
 };
 
 const cId_t GenericApp_OutClusterList[GENERICAPP_OUT_CLUSTERS] =
@@ -419,22 +421,33 @@ void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
 
            ZDO_ParseSimpleDescRsp( inMsg, pSimpleDescRsp );
            
-           if( pSimpleDescRsp->simpleDesc.AppDeviceId == M_DEVICEID_ECG)// 这次连接到的设备是ECG
+           switch(pSimpleDescRsp->simpleDesc.AppDeviceId)
            {
+            case M_DEVICEID_ECG:// 这次连接到的设备是ECG
              // 将ECG的device_id和shortAddress存储在链表中
              if(endDevice_info_find(M_DEVICEID_ECG) == FALSE)// 不存在，添加信息
                endDevice_info_add( M_DEVICEID_ECG , pSimpleDescRsp->nwkAddr );
              else // 存在，更新地址
                endDevice_info_update( M_DEVICEID_ECG , pSimpleDescRsp->nwkAddr );
-           }
-           
-           if( pSimpleDescRsp->simpleDesc.AppDeviceId == M_DEVICEID_TEMPR)// 这次连接到的设备是Tempr
-           {
+             break;
+             
+            case M_DEVICEID_TEMPR:// 这次连接到的设备是Tempr
              // 将TemprSN的device_id和shortAddress存储在链表中
              if(endDevice_info_find(M_DEVICEID_TEMPR) == FALSE)// 不存在，添加信息
                endDevice_info_add( M_DEVICEID_TEMPR , pSimpleDescRsp->nwkAddr );
              else // 存在，更新地址
                endDevice_info_update( M_DEVICEID_TEMPR , pSimpleDescRsp->nwkAddr );
+             break;
+
+            case M_DEVICEID_SPO2 :// 这次连接到的设备是ECG
+             // 将ECG的device_id和shortAddress存储在链表中
+             if(endDevice_info_find(M_DEVICEID_SPO2) == FALSE)// 不存在，添加信息
+               endDevice_info_add( M_DEVICEID_SPO2 , pSimpleDescRsp->nwkAddr );
+             else // 存在，更新地址
+               endDevice_info_update( M_DEVICEID_SPO2 , pSimpleDescRsp->nwkAddr );
+             break;
+             
+            default:break;
            }
            
            // free memory for InClusterList
@@ -520,16 +533,24 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
    
       HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);      
       break;
+    
+    case GENERICAPP_CLUSTERID_SPO2_RESULT:
+      for(i = 0 ; i < 80; i++)
+        while( Serial_UartSendMsg( &data , 1 ) == 0);       
+      break;
       
     case GENERICAPP_CLUSTERID_ECG_SYNC_OVER:
+    case GENERICAPP_CLUSTERID_SPO2_SYNC_OVER:
       for(i = 0 ; i < 104; i++)
         while( Serial_UartSendMsg( &data , 1 ) == 0);      
       break;
       
-    case GENETICAPP_CLUSTERID_TEMPR_SYNC_OVER:
+    case GENERICAPP_CLUSTERID_TEMPR_SYNC_OVER:
       for(i = 0 ; i < 80; i++)
         while( Serial_UartSendMsg( &data , 1 ) == 0);      
       break;
+
+      
   }
 }
 
@@ -609,10 +630,15 @@ void GenericApp_GetDeviceNWKAddress( uint8 *dataMsg )
     case SENSORTYPE_ELECTROCARDIOGRAMMETER: // 心电相关控制命令
       GenericApp_DstAddr.addr.shortAddr = endDevice_info_find(M_DEVICEID_ECG);
       break;
+      
     case SENSORTYPE_THERMOMETE: // 体温控制命令
       GenericApp_DstAddr.addr.shortAddr = endDevice_info_find(M_DEVICEID_TEMPR);
       break;
-    
+      
+    case SENSORTYPE_BLOODOXYGENMETER: // 血压控制命令
+      GenericApp_DstAddr.addr.shortAddr = endDevice_info_find(M_DEVICEID_SPO2);
+      break;
+      
     default:break;
   }
 }
