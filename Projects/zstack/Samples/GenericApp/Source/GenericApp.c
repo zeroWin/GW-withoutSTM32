@@ -507,7 +507,8 @@ void GenericApp_HandleKeys( byte shift, byte keys )
  */
 void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
 {
-  uint8 i;
+  uint8 i,j;
+  uint8 endNum;
   uint8 data = 0xFF;
   switch ( pkt->clusterId )
   {
@@ -520,14 +521,21 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
 #endif
       break;
     case GENERICAPP_CLUSTERID_ECG_RESULT:
-      for ( i = 0 ; i < 20 ; i++ )
-        buff3[82+i] = pkt->cmd.Data[i];
-      while( Serial_UartSendMsg( buff3 , 104 ) == 0);
+      for ( i = 0 ; i < 3 ; ++i )
+      {
+        endNum = 20*i;
+        for( j = 0 ; j < 20 ; ++j)
+          buff3[82+j] = pkt->cmd.Data[j+endNum];
+        while( Serial_UartSendMsg( buff3 , 104 ) == 0);
+        
+      }
+
    
       HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);
       break;
+      
     case GENERICAPP_CLUSTERID_TEMPR_RESULT:
-      for ( i = 0 ; i < 4 ; i++ )
+      for ( i = 0 ; i < 4 ; ++i )
         buff4[74+i] = pkt->cmd.Data[i+8];      
       while( Serial_UartSendMsg( buff4 , 80 ) == 0);
    
@@ -535,18 +543,18 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
       break;
     
     case GENERICAPP_CLUSTERID_SPO2_RESULT:
-      for(i = 0 ; i < 80; i++)
+      for(i = 0 ; i < 80; ++i)
         while( Serial_UartSendMsg( &data , 1 ) == 0);       
       break;
       
     case GENERICAPP_CLUSTERID_ECG_SYNC_OVER:
     case GENERICAPP_CLUSTERID_SPO2_SYNC_OVER:
-      for(i = 0 ; i < 104; i++)
+      for(i = 0 ; i < 104; ++i)
         while( Serial_UartSendMsg( &data , 1 ) == 0);      
       break;
       
     case GENERICAPP_CLUSTERID_TEMPR_SYNC_OVER:
-      for(i = 0 ; i < 80; i++)
+      for(i = 0 ; i < 80; ++i)
         while( Serial_UartSendMsg( &data , 1 ) == 0);      
       break;
 
