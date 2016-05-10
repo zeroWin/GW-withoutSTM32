@@ -157,6 +157,8 @@
 // The timeout tick is at 32-kHz, so multiply msecs by 33.
 #define HAL_UART_MSECS_TO_TICKS    33
 
+#define HAL_UART_ISR_RX_MAX       200
+#define HAL_UART_ISR_TX_MAX       200
 #if defined MT_TASK
 #define HAL_UART_ISR_TX_MAX        MT_UART_DEFAULT_MAX_TX_BUFF
 #define HAL_UART_ISR_RX_MAX        MT_UART_DEFAULT_MAX_RX_BUFF

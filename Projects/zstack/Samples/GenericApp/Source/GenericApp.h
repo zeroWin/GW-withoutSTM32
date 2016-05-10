@@ -95,7 +95,7 @@ extern "C"
 // SENSORTYPE ID
 #define SENSORTYPE_THERMOMETE               0xA1    // ÌåÎÂ
 #define SENSORTYPE_ELECTROCARDIOGRAMMETER   0xA2    // ÐÄµç
-#define SENSORTYPE_BLOODOXYGENMETER         0xA6    // ÑªÑ¹
+#define SENSORTYPE_BLOODOXYGENMETER         0xA6    // ÑªÑõ
 /*********************************************************************
  * MACROS
  */
