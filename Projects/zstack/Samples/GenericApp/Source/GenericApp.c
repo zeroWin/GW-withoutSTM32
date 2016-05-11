@@ -535,7 +535,6 @@ void GenericApp_HandleKeys( byte shift, byte keys )
 void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
 {
   uint8 i,j;
-  uint8 endNum;
   uint8 data = 0xFF;
   switch ( pkt->clusterId )
   {
@@ -661,6 +660,7 @@ void GenericApp_GetDeviceNWKAddress( uint8 *dataMsg )
   {
     case SENSORTYPE_ELECTROCARDIOGRAMMETER: // 心电相关控制命令
       GenericApp_DstAddr.addr.shortAddr = endDevice_info_find(M_DEVICEID_ECG);
+      buff3[20] = 0xA2;
       break;
       
     case SENSORTYPE_THERMOMETE: // 体温控制命令
@@ -669,6 +669,7 @@ void GenericApp_GetDeviceNWKAddress( uint8 *dataMsg )
       
     case SENSORTYPE_BLOODOXYGENMETER: // 血氧控制命令
       GenericApp_DstAddr.addr.shortAddr = endDevice_info_find(M_DEVICEID_SPO2);
+      buff3[20] = 0xA6;
       break;
       
     default:break;

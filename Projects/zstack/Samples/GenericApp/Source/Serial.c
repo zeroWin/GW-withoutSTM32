@@ -158,6 +158,7 @@ void Serial_UartProcesssData( uint8 port, uint8 event)
   }
   
   //接收处理
+  // 三种情况，接收满127，接收快满128/2-16，和距离接收到最后一个数据过了6ms
   if (event & ( HAL_UART_RX_FULL | HAL_UART_RX_ABOUT_FULL | HAL_UART_RX_TIMEOUT))
   {
     if ( registeredSerialTaskID )
