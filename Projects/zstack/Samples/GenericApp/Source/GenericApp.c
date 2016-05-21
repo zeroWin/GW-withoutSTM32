@@ -100,7 +100,6 @@ uint8 buff3[144] = {
 0x6F,0x12,0x83,0x3B,
 0x1,0x0,0x0,0x0,
 0x22,0x0,0x0,0x0,
-
 0x4B,0x0,0x4C,0x0,0x4D,0x0,0x4E,0x0,
 0x3,0x0,0x3,0x0,0x3,0x0,0x3,0x0,0x3,0x0,0x3,0x0,0x3,0x0,0x3,0x0,0x3,0x0,0x3,0x0,
 0x3,0x0,0x3,0x0,0x3,0x0,0x3,0x0,0x3,0x0,0x3,0x0,0x3,0x0,0x3,0x0,0x3,0x0,0x3,0x0,
@@ -547,6 +546,9 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
 #endif
       break;
     case GENERICAPP_CLUSTERID_ECG_RESULT:
+      buff3[20] = 0xA2; // 修改节点类型
+      buff3[66] = 0x01; // 修改发送数据类型
+      buff3[70] = 0x22; // 修改发送数据长度 34
       for( j = 0 ; j < 60 ; ++j)
           buff3[82+j] = pkt->cmd.Data[j];
       while( Serial_UartSendMsg( buff3 , 144 ) == 0);
@@ -563,8 +565,24 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
       break;
     
     case GENERICAPP_CLUSTERID_SPO2_RESULT:
-      for( j = 0 ; j < 60 ; ++j)
-          buff3[82+j] = pkt->cmd.Data[j];
+      buff3[20] = 0xA6; // 修改节点类型
+      buff3[66] = 0x04; // 修改发送数据类型
+      buff3[70] = 0x11; // 修改发送数据长度 17
+      // 先读取SpO2 和 HR Spo2先发
+      for(i = 0;i<4;++i)
+         buff3[74+i] = pkt->cmd.Data[64+i];
+
+      // 读取RED和IR
+      for(i = 0;i < 8 ; ++i)
+      {
+        for(j = 0; j < 4; ++j)
+        {
+          uint8 local1 = i*4+j;
+          uint8 local2 = i*8+j;
+          buff3[78+local1] = pkt->cmd.Data[local2];
+          buff3[110+local1] = pkt->cmd.Data[local2+4];
+        }
+      }
       while( Serial_UartSendMsg( buff3 , 144 ) == 0);
       
       HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);
@@ -660,7 +678,6 @@ void GenericApp_GetDeviceNWKAddress( uint8 *dataMsg )
   {
     case SENSORTYPE_ELECTROCARDIOGRAMMETER: // 心电相关控制命令
       GenericApp_DstAddr.addr.shortAddr = endDevice_info_find(M_DEVICEID_ECG);
-      buff3[20] = 0xA2;
       break;
       
     case SENSORTYPE_THERMOMETE: // 体温控制命令
@@ -669,7 +686,7 @@ void GenericApp_GetDeviceNWKAddress( uint8 *dataMsg )
       
     case SENSORTYPE_BLOODOXYGENMETER: // 血氧控制命令
       GenericApp_DstAddr.addr.shortAddr = endDevice_info_find(M_DEVICEID_SPO2);
-      buff3[20] = 0xA6;
+
       break;
       
     default:break;
