@@ -129,7 +129,9 @@ const cId_t GenericApp_InClusterList[GENERICAPP_IN_CLUSTERS] =
   GENERICAPP_CLUSTERID_TEMPR_SYNC_OVER,
   GENERICAPP_CLUSTERID_TEMPR_RESULT,
   GENERICAPP_CLUSTERID_SPO2_SYNC_OVER,
-  GENERICAPP_CLUSTERID_SPO2_RESULT
+  GENERICAPP_CLUSTERID_SPO2_RESULT,
+  GENERICAPP_CLUSTERID_BP_SYNC_OVER,
+  GENERICAPP_CLUSTERID_BP_RESULT
 };
 
 const cId_t GenericApp_OutClusterList[GENERICAPP_OUT_CLUSTERS] =
@@ -473,6 +475,13 @@ void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
                endDevice_info_update( M_DEVICEID_SPO2 , pSimpleDescRsp->nwkAddr );
              break;
              
+            case M_DEVICEID_BP :// 这次连接到的设备是BP
+             // 将BP的device_id和shortAddress存储在链表中
+             if(endDevice_info_find(M_DEVICEID_BP) == FALSE)// 不存在，添加信息
+               endDevice_info_add( M_DEVICEID_BP , pSimpleDescRsp->nwkAddr );
+             else // 存在，更新地址
+               endDevice_info_update( M_DEVICEID_BP , pSimpleDescRsp->nwkAddr );
+             break;
             default:break;
            }
            
@@ -545,7 +554,7 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
       WPRINTSTR( pkt->cmd.Data );
 #endif
       break;
-    case GENERICAPP_CLUSTERID_ECG_RESULT:
+    case GENERICAPP_CLUSTERID_ECG_RESULT: // 心电
       buff3[20] = 0xA2; // 修改节点类型
       buff3[66] = 0x01; // 修改发送数据类型
       buff3[70] = 0x22; // 修改发送数据长度 34
@@ -564,7 +573,7 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
       HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);      
       break;
     
-    case GENERICAPP_CLUSTERID_SPO2_RESULT:
+    case GENERICAPP_CLUSTERID_SPO2_RESULT: // 血氧
       buff3[20] = 0xA6; // 修改节点类型
       buff3[66] = 0x04; // 修改发送数据类型
       buff3[70] = 0x11; // 修改发送数据长度 17
@@ -587,8 +596,34 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
       
       HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);
       break;
+    
+    case GENERICAPP_CLUSTERID_BP_RESULT: //血压
+      buff3[20] = 0xA3; // 修改节点类型
+      buff3[66] = 0x01; // 修改发送数据类型
+      buff3[70] = 0x22; // 修改发送数据长度 34
+      
+      // 先读取高压BP_HIGH 和低压BP_LOW 先发
+      for(i = 0;i<4;++i)
+         buff3[74+i] = pkt->cmd.Data[64+i];   
+      
+      // 读取DC和AC
+      for(i = 0;i < 16 ; ++i)
+      {
+        for(j = 0; j < 2; ++j)
+        {
+          uint8 local1 = i*2+j;
+          uint8 local2 = i*4+j;
+          buff3[78+local1] = pkt->cmd.Data[local2];
+          buff3[110+local1] = pkt->cmd.Data[local2+2];
+        }
+      }      
+      while( Serial_UartSendMsg( buff3 , 144 ) == 0);
+      HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);
+      break; 
+      
       
     case GENERICAPP_CLUSTERID_ECG_SYNC_OVER:
+    case GENERICAPP_CLUSTERID_BP_SYNC_OVER:
     case GENERICAPP_CLUSTERID_SPO2_SYNC_OVER:
       for(i = 0 ; i < 104; ++i)
         while( Serial_UartSendMsg( &data , 1 ) == 0);      
@@ -686,9 +721,11 @@ void GenericApp_GetDeviceNWKAddress( uint8 *dataMsg )
       
     case SENSORTYPE_BLOODOXYGENMETER: // 血氧控制命令
       GenericApp_DstAddr.addr.shortAddr = endDevice_info_find(M_DEVICEID_SPO2);
-
       break;
       
+    case SENSORTYPE_BLOODPRESSUREMETER: // 血压控制命令
+      GenericApp_DstAddr.addr.shortAddr = endDevice_info_find(M_DEVICEID_BP);
+      break;
     default:break;
   }
 }

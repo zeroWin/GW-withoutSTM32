@@ -63,7 +63,7 @@ extern "C"
 #define GENERICAPP_DEVICE_VERSION     0
 #define GENERICAPP_FLAGS              0
 
-#define GENERICAPP_IN_CLUSTERS        7
+#define GENERICAPP_IN_CLUSTERS        9
 #define GENERICAPP_OUT_CLUSTERS       4  
 
 #define GENERICAPP_CLUSTERID                  0x0001   // I/O
@@ -74,10 +74,12 @@ extern "C"
 #define GENERICAPP_CLUSTERID_ECG_SYNC_OVER    0x0021   // I
 #define GENERICAPP_CLUSTERID_TEMPR_SYNC_OVER  0x0022   // I
 #define GENERICAPP_CLUSTERID_SPO2_SYNC_OVER   0x0023   // I
-
+#define GENERICAPP_CLUSTERID_BP_SYNC_OVER     0x0024   // I 
+  
 #define GENERICAPP_CLUSTERID_ECG_RESULT       0x0030   // I 0x003x 是测量结果相关指令
 #define GENERICAPP_CLUSTERID_TEMPR_RESULT     0x0031   // I
 #define GENERICAPP_CLUSTERID_SPO2_RESULT      0x0032   // I
+#define GENERICAPP_CLUSTERID_BP_RESULT        0x0033   // I 
   
 // Send Message Timeout
 #define GENERICAPP_SEND_MSG_TIMEOUT   5000     // Every 5 seconds
@@ -91,10 +93,12 @@ extern "C"
 #define M_DEVICEID_ECG                0x0001  // ECG device ID
 #define M_DEVICEID_TEMPR              0x0002  // TEMPR device ID
 #define M_DEVICEID_SPO2               0x0003  // SpO2 deivce ID
+#define M_DEVICEID_BP                 0x0004  // BP device ID
   
 // SENSORTYPE ID
 #define SENSORTYPE_THERMOMETE               0xA1    // 体温
 #define SENSORTYPE_ELECTROCARDIOGRAMMETER   0xA2    // 心电
+#define SENSORTYPE_BLOODPRESSUREMETER       0xA3    // 血压
 #define SENSORTYPE_BLOODOXYGENMETER         0xA6    // 血氧
 /*********************************************************************
  * MACROS
